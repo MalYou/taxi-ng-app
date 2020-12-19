@@ -14,6 +14,8 @@ from pathlib import Path
 
 import os
 
+import datetime
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -55,6 +57,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
+    'ACCESS_REFRESH_LIFETIME': datetime.timedelta(days=1),
+    'USER_ID_CLAIMS': 'id',
+}
+
 ROOT_URLCONF = 'taxi.urls'
 
 TEMPLATES = [
@@ -78,7 +93,7 @@ ASGI_APPLICATION = 'taxi.routing.application'
 
 # Channel Layers configuration
 
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+REDIS_URL = os.getenv('REDIS_URL')
 
 CHANNEL_LAYERS = {
     'default': {

@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
 
-# Create your views here.
+from rest_framework import generics
+
+from . import serializers
+
+
+class SignUpView(generics.CreateAPIView):
+    """Endpoint to create a new user"""
+    queryset = get_user_model().objects.all()
+    serializer_class = serializers.SignupSerializer
