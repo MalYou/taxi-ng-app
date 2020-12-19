@@ -1,9 +1,11 @@
-from rest_framework import serializers
-
 from django.contrib.auth import get_user_model
 
+from rest_framework import serializers
 
-class SignupSerializer(serializers.ModelSerializer):
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class UserSerializer(serializers.ModelSerializer):
     """Serializer for signup"""
     password1 = serializers.CharField(write_only=True, min_length=5,
                                       style={'input_type': 'password'},
@@ -34,3 +36,17 @@ class SignupSerializer(serializers.ModelSerializer):
         validated_data['password'] = validated_data.pop('password2')
 
         return get_user_model().objects.create_user(**validated_data)
+
+
+class LogInSerializer(TokenObtainPairSerializer):
+    """Serializer for generation token"""
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        user_data = UserSerializer(user).data
+
+        for key, value in user_data.items():
+            if key != 'id':
+                token[key] = value
+
+        return token
