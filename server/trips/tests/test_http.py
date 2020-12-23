@@ -8,9 +8,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from trips.models import Trip
+
 
 AUTHENTICATION_URL = reverse('sign_up')
 LOGIN_URL = reverse('log_in')
+TRIPS_URL = reverse('trip:trip_list')
 PASSWORD = 'Test1245'
 
 
@@ -68,3 +71,49 @@ class AuthenticationTest(TestCase):
         self.assertEqual(payload_data['user_id'], user.id)
         self.assertEqual(payload_data['email'], user.email)
         self.assertEqual(payload_data['username'], user.username)
+
+
+class HttpTripTest(TestCase):
+    """Test trip endpoint"""
+
+    def setUp(self):
+        self.client = APIClient()
+        user = sample_user()
+
+        res = self.client.post(LOGIN_URL, {
+            'username': user.username,
+            'password': PASSWORD,
+        })
+
+        self.access = res.data['access']
+
+    def test_user_can_list_trips(self):
+        """Test that connected user can retriev trips"""
+        trips = [
+            Trip.objects.create(pick_up_address='A', drop_off_address='B'),
+            Trip.objects.create(pick_up_address='B', drop_off_address='C'),
+        ]
+
+        res = self.client.get(
+            TRIPS_URL, HTTP_AUTHORIZATION=f'Bearer {self.access}'
+        )
+
+        exp_ids = [str(trip.id) for trip in trips]
+        res_ids = [trip.get('id') for trip in res.data]
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertCountEqual(exp_ids, res_ids)
+
+    def test_user_can_retrieve_trip_by_id(self):
+        """Test that the authenticated user can get trip detail"""
+        trip = Trip.objects.create(
+            pick_up_address='A',
+            drop_off_address='B',
+            status='REQUEST'
+        )
+
+        res = self.client.get(trip.get_absolute_url(),
+                              HTTP_AUTHORIZATION=f'Bearer {self.access}')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(str(trip.id), res.data['id'])
