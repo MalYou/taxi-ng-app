@@ -24,7 +24,7 @@ class TripView(viewsets.ReadOnlyModelViewSet):
     """Endpoint for getting Trips or a specific trip"""
     lookup_field = 'id'
     lookup_url_kwarg = 'trip_id'
-    serializer_class = serializers.TripSerializer
+    serializer_class = serializers.NestedTripSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
