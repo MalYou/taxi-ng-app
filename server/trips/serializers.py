@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import fields
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -60,3 +61,10 @@ class TripSerializer(serializers.ModelSerializer):
         model = Trip
         fields = '__all__'
         read_only_fields = ('id', 'created', 'updated')
+
+
+class NestedTripSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trip
+        fields = '__all__'
+        depth = 1
