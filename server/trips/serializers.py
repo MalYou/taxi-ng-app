@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import fields
+from django.contrib.auth.models import Group
 
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -17,12 +17,14 @@ class UserSerializer(serializers.ModelSerializer):
                                       style={'input_type': 'password'},
                                       trim_whitespace=False
                                       )
+    group = serializers.CharField()
 
     class Meta:
         model = get_user_model()
         fields = (
             'id', 'email', 'username',
-            'password1', 'password2',
+            'password1', 'password2', 'first_name',
+            'last_name', 'group'
         )
         read_only_fields = ('id',)
 
@@ -34,10 +36,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create serializer user"""
-        validated_data.pop('password1')
-        validated_data['password'] = validated_data.pop('password2')
+        group_data = validated_data.pop('goup')
+        group, _ = Group.objects.get_or_create(name=group_data)
+        data = {
+            key: value for key, value in validated_data.items()
+            if key not in ('password1', 'password2')
+        }
+        data['password'] = validated_data['password1']
+        user = self.Meta.model.objects.create_user(**data)
+        user.groups.add(group)
 
-        return get_user_model().objects.create_user(**validated_data)
+        user.save()
+        return user
 
 
 class LogInSerializer(TokenObtainPairSerializer):
