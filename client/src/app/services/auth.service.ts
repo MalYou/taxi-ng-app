@@ -95,4 +95,12 @@ export class AuthService {
     const decoded = window.atob(payload);
     return JSON.parse(decoded);
   }
+
+  static isRider(): boolean {
+    const user = this.getUser();
+    if (user) {
+      return user.group === 'rider';
+    }
+    return false;
+  }
 }
