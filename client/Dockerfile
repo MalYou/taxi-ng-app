@@ -26,6 +26,3 @@ RUN npm install
 
 # copy the client directory into the container
 COPY . /usr/src/app
-
-RUN adduser -D user
-USER user

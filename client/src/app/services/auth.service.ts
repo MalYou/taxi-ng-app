@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -54,7 +54,7 @@ export class AuthService {
     formData.append('password2', password);
     formData.append('group', group);
     formData.append('photo', photo);
-    return this.http.request<User>('POST', url, { body: formData });
+    return this.http.request<User>('POST', url, { body: formData});
   }
 
   logIn(username: string, password: string): Observable<Token> {

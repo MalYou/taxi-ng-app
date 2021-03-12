@@ -11,21 +11,29 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./sign-up.component.css']
 })
 export class SignUpComponent {
+  userPhoto: any;
 
   constructor(
     private router: Router,
     private authService: AuthService
   ) {}
 
+  onChange(event: any): void {
+    if (event.target.files && event.target.files.length > 0) {
+      this.userPhoto = event.target.files[0];
+    }
+  }
+
   onSubmit(f: NgForm): void {
-    if(f.valid) {
+    if(true) {
+      console.log(f);
       this.authService.signUp(
         f.controls['userName'].value,
         f.controls['firstName'].value,
         f.controls['lastName'].value,
         f.controls['password'].value,
         f.controls['group'].value,
-        f.controls['photo'].value,
+        this.userPhoto,
       ).subscribe(() => {
         this.router.navigateByUrl('/log-in');
       }, (error) => {
