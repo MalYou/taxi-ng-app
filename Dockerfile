@@ -17,5 +17,7 @@ RUN mkdir /server
 WORKDIR /server
 COPY ./server /server
 
+RUN python manage.py collectstatic --noinput
+
 RUN adduser -D user
 USER user

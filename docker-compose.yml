@@ -7,15 +7,18 @@ services:
     container_name: taxi-server
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             daphne --bind 0.0.0.0 --port 8000 taxi.asgi:application"
     depends_on:
       - taxi-redis
+      - taxi-database
     env_file: 
       - ./.env
     ports:
-      - '8000:8000'
+      - '8001:8000'
     volumes:
       - ./server:/server
+      - media:/server/media
+      - static:/server/static
 
   taxi-database:
     container_name: taxi-database
@@ -23,15 +26,13 @@ services:
     env_file: 
       - ./.env
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - taxi-database:/var/lib/postgresql/data
 
   taxi-redis:
     container_name: taxi-redis
     image: redis
-    ports:
-      - '6379:6379'
   
   taxi-client:
     build:
@@ -47,5 +48,21 @@ services:
     volumes:
       - ./client:/usr/src/app
 
+  nginx:
+    build:
+      context: ./nginx
+    container_name: taxi-nginx
+    depends_on: 
+      - taxi-server
+      - taxi-client
+    ports:
+      - 8084:80
+    restart: always
+    volumes: 
+      - media:/server/media
+      - static:/server/static
+
 volumes:
   taxi-database:
+  media:
+  static:
