@@ -1,35 +1,51 @@
 version: '3'
 
 services:
-  server:
+  taxi-server:
     build:
       context: .
+    container_name: taxi-server
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - taxi-redis
+    env_file: 
+      - ./.env
     ports:
       - '8000:8000'
     volumes:
       - ./server:/server
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    environment:
-      - DB_HOST=db
-      - DB_NAME=${POSTGRES_DB}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - SECRET_KEY=${SECRET_KEY}
-    depends_on:
-      - db
 
-  db:
+  taxi-database:
+    container_name: taxi-database
     image: postgres:10-alpine
+    env_file: 
+      - ./.env
     ports:
       - '5432:5432'
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - taxi-database:/var/lib/postgresql/data
 
-  redis:
+  taxi-redis:
+    container_name: taxi-redis
     image: redis
     ports:
       - '6379:6379'
+  
+  taxi-client:
+    build:
+      context: ./client
+    command: ng serve --host 0.0.0.0
+    container_name: taxi-client
+    depends_on:
+      - taxi-server
+    environment:
+      - CHROME_BIN=chromium-browser
+    ports:
+      - 4201:4200
+    volumes:
+      - ./client:/usr/src/app
+
+volumes:
+  taxi-database:

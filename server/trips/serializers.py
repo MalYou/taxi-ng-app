@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
                                       trim_whitespace=False
                                       )
     group = serializers.CharField()
+    #photo = serializers.ImageField(upload_to='photos', null=True, blank=True)
 
     class Meta:
         model = get_user_model()
@@ -36,7 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create serializer user"""
-        group_data = validated_data.pop('goup')
+        group_data = validated_data.pop('group')
         group, _ = Group.objects.get_or_create(name=group_data)
         data = {
             key: value for key, value in validated_data.items()
