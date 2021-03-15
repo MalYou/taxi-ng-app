@@ -101,6 +101,6 @@ export class AuthService {
     if (user) {
       return user.group === 'rider';
     }
-    return false;
+    return true;
   }
 }

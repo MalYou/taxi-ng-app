@@ -36,7 +36,7 @@ class TripView(viewsets.ReadOnlyModelViewSet):
             )
 
         if user.group == 'rider':
-            return models.Trip.filter(rider=user)
+            return models.Trip.objects.filter(rider=user)
 
         return models.Trip.objects.none()
 
